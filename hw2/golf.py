@@ -1,4 +1,4 @@
-#Golf Ball Code 
+#!/opt/anaconda3/bin/python 
 
 import math 
 import numpy as np
@@ -20,7 +20,6 @@ class golfball:
     def parse_argv(self):
         for arg in sys.argv[1:]:
             self.theta=[float(angle) for angle in arg.split('=')[1].split(',')]
-        print(self.theta)
         self.trajecs={angle:{} for angle in self.theta} #Dataframe to store a dictionary for each angle for each case 
 
     def ideal(self): #Case 1
