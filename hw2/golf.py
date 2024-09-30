@@ -6,6 +6,12 @@ import matplotlib.pyplot as plt
 import sys 
 from matplotlib.lines import Line2D
 
+
+########### Things to do:   
+########### -Add angle(s) plotted in title
+########### -Keep track/print total time of flight 
+
+
 class golfball:
 
     def __init__(self):
@@ -61,13 +67,13 @@ class golfball:
         for angle, cases in self.trajecs.items():
             for case, (x_values, y_values) in cases.items():
                 plt.plot(x_values,y_values,label=f'{angle} degrees - {case}')
-        plt.title('Trajectory of a Golf Ball')
+        plt.title('Trajectory of a Golf Ball') 
         plt.xlabel('Distance in x (m)')
         plt.ylabel('Height (m)')
         plt.legend()
         plt.show()
 
-    #Analysis
+    #Analysis (Final velocities, time of flight)
 
 if __name__ == "__main__":
     data=golfball()
