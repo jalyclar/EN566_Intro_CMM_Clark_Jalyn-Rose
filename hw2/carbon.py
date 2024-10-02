@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 import math
 import sys 
 
+DEBUG=False
+
 #Variables 
 n_a=6.022*10**23 #avagradros number (nuclei/mol)
 mm=14 #molar mass of carbon (g/mol)
@@ -16,7 +18,9 @@ total_t=20000 #total duration of decay (years)
 
 #Parsing through system arguments 
 for arg in sys.argv[1:]:
-    delta_t=float(arg.split('=')[1]) #time step (years) 
+    delta_t=float(arg.split('=')[1]) #time step (years)
+if DEBUG==True:
+    print(f"delta_t={delta_t}")
 
 #Parameters
 t=np.arange(0,total_t,delta_t) #time step array
@@ -29,10 +33,14 @@ a[0]=np.divide(n0,tau) #First value
 for i in range(0, len(t)-1):
     n[i+1]=n[i]-(np.divide(n[i],tau))*delta_t
     a[i+1]=np.divide(n[i+1],tau)
+if DEBUG==True:
+    print(f"a={a}")
 
 #Exact calculations 
 a_exact=np.zeros(len(t))
 a_exact=(np.divide(n0,tau))*np.exp(np.divide(-t,tau))
+if DEBUG==True:
+    print(f"a_exact={a_exact}")
 
 #Plot 
 plt.figure()
@@ -55,3 +63,5 @@ if delta_t >= 1000:
     a_exact=a_exact[time_i]
     perc_dev=np.divide((a-a_exact),a_exact)*100 #Should this be absolute value or no so negative shows its decrease
     print(f'After 2 half-lives the percent deviation from the exact result is {perc_dev:.2f}%')
+    if DEBUG==True:
+        print(f"perc_dev={perc_dev}")

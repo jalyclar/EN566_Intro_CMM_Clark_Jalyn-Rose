@@ -9,8 +9,6 @@ import pandas as pd
 ############                   TO DO:
 ############              -Optimize each function to shorten amount of lines 
 ############              -Document code 
-############              -Add DEBUG=TRUE print statments throughout 
-############              -Adjust sig figs in printing results statments 
 
 class golfball:
 
@@ -24,13 +22,16 @@ class golfball:
         self.delta_t=0.1 #time step (seconds)
         self.x_0=0.0 #Initial postion of ball in x-direction
         self.y_0=0.0 #Initial postion of ball in y-direction
+        self.DEBUG=False
         
     def parse_argv(self):
         for arg in sys.argv[1:]:
             self.theta=float(arg.split('=')[1])
         self.v_x_0=self.v_0*math.cos(math.radians(self.theta)) #Initial velocity in x-direction
         self.v_y_0=self.v_0*math.sin(math.radians(self.theta)) #Initial velocity in y-direction
-
+        if self.DEBUG==True:
+            print(f"theta={self.theta}")
+            
     def ideal(self): #Case 1: Ideal 
         x=self.x_0 #Initializing starting boundaries
         y=self.y_0 
@@ -49,7 +50,9 @@ class golfball:
             v_y=v_y-self.g*self.delta_t
             ideal_total_t+=self.delta_t #Time of flight 
         vf_ideal=v_mag #Final velocity
-        print(f'Ideal golf ball hit at {self.theta}: v_f (m/s)={vf_ideal} t_f (s)={ideal_total_t}')
+        if self.DEBUG==True:
+            print(f"vmag={v_mag},total t={ideal_total_t}")
+        print(f'Ideal golf ball hit at {self.theta}: v_f (m/s)={vf_ideal:.2f}, t_f (s)={ideal_total_t:.2f}')
  
     def smooth_drag(self): #Case 2: Smooth golf ball with drag  
         x=self.x_0 #Initializing starting boundaries
@@ -70,7 +73,9 @@ class golfball:
             v_y=v_y-(self.g*self.delta_t)-((C*self.rho*self.a*v_mag)/self.m)*v_y*self.delta_t
             smooth_drag_t+=self.delta_t
         vf_smooth_drag=v_mag #Final velocity 
-        print(f'Smooth golf ball with drag hit at {self.theta}: v_f (m/s)={vf_smooth_drag} t_f (s)={smooth_drag_t}')
+        if self.DEBUG==True:
+            print(f"vmag={v_mag},total t={smooth_drag_t}")
+        print(f'Smooth golf ball with drag hit at {self.theta}: v_f (m/s)={vf_smooth_drag:.2f}, t_f (s)={smooth_drag_t:.2f}')
 
     def dimpled_drag(self): #Case 3: Dimpled golf ball with drag 
         x=self.x_0 #Initializing starting boundaries 
@@ -94,7 +99,9 @@ class golfball:
             v_y=v_y-(self.g*self.delta_t)-((C*self.rho*self.a*v_mag)/self.m)*v_y*self.delta_t
             dimple_drag_t+=self.delta_t
         vf_dimple_drag=v_mag #Final velocity 
-        print(f'Dimpled golf ball with drag hit at {self.theta}: v_f (m/s)={vf_dimple_drag} t_f (s)={dimple_drag_t}')
+        if self.DEBUG==True:
+            print(f"vmag={v_mag},total t={dimple_drag_t}")
+        print(f'Dimpled golf ball with drag hit at {self.theta}: v_f (m/s)={vf_dimple_drag:.2f}, t_f (s)={dimple_drag_t:.2f}')
 
     def spin(self): #Case 4: Dimpled golf ball with drage and spin  
         x=self.x_0 #Initializing starting boundaries
@@ -118,8 +125,10 @@ class golfball:
             v_x=v_x+(-((C*self.rho*self.a*v_mag)/self.m)-(Sow/self.m)*v_y)*self.delta_t
             v_y=v_y+(-((C*self.rho*self.a*v_mag)/self.m)-(Sow/self.m)*v_x-self.g)*self.delta_t
             spin_t+=self.delta_t
-        vf_spin=v_mag #Final velocity 
-        print(f'Dimpled golf ball with drag and spin hit at {self.theta}: v_f (m/s)={vf_spin} t_f (s)={spin_t}')
+        vf_spin=v_mag #Final velocity
+        if self.DEBUG==True:
+            print(f"vmag={v_mag},total t={spin_t}")
+        print(f'Dimpled golf ball with drag and spin hit at {self.theta}: v_f (m/s)={vf_spin:.2f}, t_f (s)={spin_t:.2f}')
 
     def plot(self): #Plotting trajectories
         plt.figure()
