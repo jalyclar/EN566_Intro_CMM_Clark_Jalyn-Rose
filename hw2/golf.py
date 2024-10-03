@@ -48,7 +48,7 @@ class golfball:
         vf_ideal=v_mag #Final velocity
         if self.DEBUG==True:
             print(f"vmag={v_mag},total t={ideal_total_t}")
-        print(f'Ideal golf ball hit at {self.theta}: v_f (m/s)={vf_ideal:.2f}, t_f (s)={ideal_total_t:.2f}')
+        print(f'Ideal golf ball hit at {self.theta} degrees: v_f (m/s)={vf_ideal:.2f}, t_f (s)={ideal_total_t:.2f}')
  
     def smooth_drag(self): #Case 2: Smooth golf ball with drag  
         x=self.x_0 #Initializing starting boundaries
@@ -71,7 +71,7 @@ class golfball:
         vf_smooth_drag=v_mag #Final velocity 
         if self.DEBUG==True:
             print(f"vmag={v_mag},total t={smooth_drag_t}")
-        print(f'Smooth golf ball with drag hit at {self.theta}: v_f (m/s)={vf_smooth_drag:.2f}, t_f (s)={smooth_drag_t:.2f}')
+        print(f'Smooth golf ball with drag hit at {self.theta} degrees: v_f (m/s)={vf_smooth_drag:.2f}, t_f (s)={smooth_drag_t:.2f}')
 
     def dimpled_drag(self): #Case 3: Dimpled golf ball with drag 
         x=self.x_0 #Initializing starting boundaries 
@@ -97,7 +97,7 @@ class golfball:
         vf_dimple_drag=v_mag #Final velocity 
         if self.DEBUG==True:
             print(f"vmag={v_mag},total t={dimple_drag_t}")
-        print(f'Dimpled golf ball with drag hit at {self.theta}: v_f (m/s)={vf_dimple_drag:.2f}, t_f (s)={dimple_drag_t:.2f}')
+        print(f'Dimpled golf ball with drag hit at {self.theta} degrees: v_f (m/s)={vf_dimple_drag:.2f}, t_f (s)={dimple_drag_t:.2f}')
 
     def spin(self): #Case 4: Dimpled golf ball with drage and spin  
         x=self.x_0 #Initializing starting boundaries
@@ -124,7 +124,7 @@ class golfball:
         vf_spin=v_mag #Final velocity
         if self.DEBUG==True:
             print(f"vmag={v_mag},total t={spin_t}")
-        print(f'Dimpled golf ball with drag and spin hit at {self.theta}: v_f (m/s)={vf_spin:.2f}, t_f (s)={spin_t:.2f}')
+        print(f'Dimpled golf ball with drag and spin hit at {self.theta} degrees: v_f (m/s)={vf_spin:.2f}, t_f (s)={spin_t:.2f}')
 
     def plot(self): #Plotting trajectories
         plt.figure()
