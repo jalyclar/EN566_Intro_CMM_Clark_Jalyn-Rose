@@ -51,11 +51,11 @@ plt.xlabel('Time (years)')
 plt.ylabel('Activity (decay/year)')
 plt.legend()
 plt.text(-2,1*10**9,f'Time step={delta_t} years',fontsize=10,bbox=dict(facecolor='grey',alpha=0.5,edgecolor='black'))
+plt.savefig(f'/Users/jalyn-roseclark/Desktop/Materials Modeling /hw2/{delta_t}.jpeg',dpi=200)
 plt.show()
 
 #Analysis 
-#Percent deviation from exact after 2 half lives (For when delta t is 1000 years part c of question)
-if delta_t >= 1000:
+if delta_t >= 1000: #Percent deviation from exact after 2 half lives (For when delta t is 1000 years part c of question)
     two_half=2*half_life
     rounded=math.ceil(two_half/1000)*1000
     time_i=np.where(t==rounded)[0][0]

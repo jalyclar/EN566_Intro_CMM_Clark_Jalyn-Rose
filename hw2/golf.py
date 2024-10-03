@@ -6,10 +6,6 @@ import matplotlib.pyplot as plt
 import sys 
 import pandas as pd
 
-############                   TO DO:
-############              -Optimize each function to shorten amount of lines 
-############              -Document code 
-
 class golfball:
 
     def __init__(self):
@@ -19,7 +15,7 @@ class golfball:
         self.rho=1.29*1000 #Density of air at sea level (g/m^3) 
         self.a=0.0014 #Frontal area of the golf ball (m^2)
         self.g=9.8 #Gravity (m/s^2)
-        self.delta_t=0.1 #time step (seconds)
+        self.delta_t=0.01 #time step (seconds)
         self.x_0=0.0 #Initial postion of ball in x-direction
         self.y_0=0.0 #Initial postion of ball in y-direction
         self.DEBUG=False
@@ -140,6 +136,7 @@ class golfball:
         plt.xlabel('Distance in x (m)') 
         plt.ylabel('Height (m)')
         plt.legend(title='Cases',loc='upper left',fontsize='small')
+        plt.savefig(f'/Users/jalyn-roseclark/Desktop/Materials Modeling /hw2/{self.theta}.jpeg',dpi=200)
         plt.show()
 
 if __name__ == "__main__":
