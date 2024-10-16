@@ -1,6 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import math
+from scipy.signal import find_peaks 
+from scipy.signal import peak_widths
 
 def partone(DEBUG=False):
     def pendulum_simulation(omega_D):
@@ -109,6 +111,7 @@ def partone(DEBUG=False):
             print(f"driven time values: {rk_t_values[1:30]}\n\n")
         return t_values,theta_values, d_t_values, d_theta_values, type_damp, rk_t_values,rk_theta_values,omega_values,d_omega_values,rk_omega_values,rk_drive_values
 
+    #Calculating pendulum simulation using single omega_D value
     omega_D_fix=0.935
     t_values,theta_values, d_t_values, d_theta_values, type_damp, rk_t_values,rk_theta_values,omega_values,d_omega_values,rk_omega_values,rk_drive_values=pendulum_simulation(omega_D_fix)
 
@@ -136,13 +139,18 @@ def partone(DEBUG=False):
     #Different driving frequencies analysis 
     theta_0_values=[]
     phi_values=[]
-    omega_D_range=np.arange(0.2,1.5,0.1)
-    print(omega_D_range)
+    g=9.8 #m/s^2
+    l=9.8 #m
+    omega_0=math.sqrt(g/l)
+    omega_D_range=np.arange(omega_0*0.1,omega_0*3,0.1)
+    if DEBUG==True:
+        print(omega_D_range)
 
+    #Calculating driven pendulum simulation for range of omega_D values 
     for omega_D in omega_D_range:
         t_values,theta_values, d_t_values, d_theta_values, type_damp, rk_t_values,rk_theta_values,omega_values,d_omega_values,rk_omega_values,rk_drive_values=pendulum_simulation(omega_D)
         #Extracting around steady-state 
-        ss_theta=rk_theta_values[-len(rk_theta_values)//4:]
+        ss_theta=rk_theta_values[-len(rk_theta_values)//4:] #Last 1/4 of values (around steady portion)
         ss_time=rk_t_values[-len(rk_t_values)//4:]
         ss_drive=rk_drive_values[-len(rk_drive_values)//4:]
         #Finding amplitude as the max in the ssteady state 
@@ -159,16 +167,30 @@ def partone(DEBUG=False):
         print(f"omega_D range: {omega_D_range}\n\n")
         print(f"theta_0 values: {theta_0_values}\n\n")
 
-    #Plots - Different driving frequencies 
+    #Plots - Different driving frequencies resonance structure mapping analysis  
     fig,(ax3,ax4)=plt.subplots(2,1, figsize=(12,6))
     ax3.plot(omega_D_range, theta_0_values)
-    ax3.set_xlabel(r'Driving Frequency $\Omega_D$')
-    ax3.set_ylabel(r'Amplitude $\theta_0(\Omega_D)$')
+    ax3.set_xlabel(r'Driving Frequency $\Omega_\text{D} (\frac{\text{rad}}{\text{sec}})$')
+    ax3.set_ylabel(r'Amplitude $\theta_0(\Omega_\text{D})$(rad)')
     ax4.plot(omega_D_range, phi_values)
-    ax4.set_xlabel(r'Driving Frequency $\Omega_D$')
-    ax4.set_ylabel(r'Phase Shift $\phi(\Omega_D)$')
+    ax4.set_xlabel(r'Driving Frequency $\Omega_\text{D} (\frac{\text{rad}}{\text{sec}})$')
+    ax4.set_ylabel(r'Phase Shift $\phi(\Omega_\text{D})$(rad)')
+    ax.set_ylim([0, max(theta_0_values)])
+    fig.suptitle('Resonance Structure Mapping')
     plt.tight_layout()
     plt.show()
+
+    #FWHM of resonnace curve calculation
+    res_values=np.array(theta_0_values)
+    res_peaks,_=find_peaks(res_values,distance=2)
+    final_peak=res_values[res_peaks]
+    #plt.plot(final_peak)
+    #plt.plot(omega_D_range, theta_0_values)
+    plt.show()
+    if DEBUG==True:
+        print(res_values)
+        print(final_peak)
+
 
 #calling functions 
 partone(DEBUG=False)
