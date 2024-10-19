@@ -20,6 +20,10 @@ class oscillatory:
         self.rk_theta_values=[]
         self.rk_t_values=[]
         self.rk_drive_values=[]
+        self.nl_omega=[]
+        self.nl_theta=[]
+        self.nl_t=[]
+        self.nl_drive=[] 
         self.t_0=0 #seconds 
         self.omega_i=1 #m/s^2 initial velocity 
         self.theta_0=math.radians(15) #rad initial angle
@@ -27,119 +31,159 @@ class oscillatory:
         self.q=2*self.gamma #Damp factor
         self.DEBUG=False 
     
+    def linear_simulation(self,omega_D=1,t_array=np.arange(1,10,0.1),delta_t=1):
+        self.omega_values=[]
+        self.theta_values=[]
+        self.t_values=[]
+        self.d_omega_values=[]
+        self.d_theta_values=[]
+        self.d_t_values=[]
+        self.rk_omega_values=[]
+        self.rk_theta_values=[]
+        self.rk_t_values=[]
+        self.rk_drive_values=[]
+
+        t=self.t_0 
+        omega=self.omega_i
+        theta=self.theta_0
+        q=self.q
+        if self.DEBUG==True:
+            print(f"q: {q}\n\n")
+            print(f"theta: {theta}\n\n") 
+
+        #Condition for Damped 
+        if q<(2*math.sqrt(self.g/self.l)): #Determing type of dampining based on damp factor 
+            self.type_damp=r"Underdamped ($\gamma < \omega_0$)"
+        elif q==(2*math.sqrt(self.g/self.l)):
+            self.type_damp=r"Critically Damped ($\gamma = \omega_0$)"
+        elif q>(2*math.sqrt(self.g/self.l)):
+            self.type_damp=r"Overdamped ($\gamma > \omega_0$)"
+        if self.DEBUG==True:
+            print(f"type_damp: {self.type_damp}\n\n")
+        
+        #Numerical caluclations - Undamped - Euler-cromer method 
+        for i in range(1, len(t_array)): #providing a signficant amount of steps 
+            self.omega_values.append(omega)
+            self.theta_values.append(theta)
+            self.t_values.append(t)
+            omega=omega-(self.g/self.l)*theta*delta_t 
+            theta=theta+omega*delta_t
+            t=t+delta_t
+            #if abs(omega)<=1e-8 and abs(theta)<=1e-8: #exit loop when close to 0 
+                #break
+        if self.DEBUG==True:
+            print(f"undamped omega: {self.omega_values[1:30]}\n\n")
+            print(f"undamped angle: {self.theta_values[1:30]}\n\n")
+            print(f"undamped time values: {self.t_values[1:30]}\n\n")
+
+        #Resetting needed variables 
+        t=self.t_0
+        omega=self.omega_i 
+        theta=self.theta_0 
+
+        #Numerical calculation - Damped - Euler-cromer method 
+        for i in range(1, len(t_array)): #Over a signficant amount of steps 
+            self.d_omega_values.append(omega)
+            self.d_theta_values.append(theta)
+            self.d_t_values.append(t)
+            omega=omega-((self.g/self.l)*theta*delta_t+q*omega*delta_t)
+            theta=theta+omega*delta_t
+            t=t+delta_t
+            #if abs(omega)<=1e-8 and abs(theta)<=1e-8:
+                #break
+        if self.DEBUG==True:
+            print(f"damped omega: {self.d_omega_values[1:30]}\n\n")
+            print(f"damped angle: {self.d_theta_values[1:30]}\n\n")
+            print(f"damped time values: {self.d_t_values[1:30]}\n\n")
+        
+        #Resetting needed variables 
+        t=self.t_0
+        omega=self.omega_i
+        theta=self.theta_0 
+        alpha=0.2 #rad/s^2
+
+        #Numerical calculation - Driven - Runge-Kutta 4th Order
+        #for i in range(10000): 
+        for i in range(1, len(t_array)):
+            k1_omega=delta_t*((-self.g/self.l)*theta-2*self.gamma*omega+alpha*math.sin(omega_D*t))
+            k1_theta=delta_t*omega
+            k2_omega=delta_t*((-self.g/self.l)*(theta+(k1_theta/2))-2*self.gamma*(omega+(k1_omega/2))+alpha*math.sin(omega_D*(t+(delta_t/2)))) 
+            k2_theta=delta_t*(omega+(k1_omega/2))
+            k3_omega=delta_t*((-self.g/self.l)*(theta+(k2_theta/2))-2*self.gamma*(omega+(k2_omega/2))+alpha*math.sin(omega_D*(t+(delta_t/2))))
+            k3_theta=delta_t*(omega+(k2_omega/2))
+            k4_omega=delta_t*((-self.g/self.l)*(theta+k3_theta)-2*self.gamma*(omega+k3_omega)+alpha*math.sin(omega_D*(t+delta_t))) 
+            k4_theta=delta_t*(omega+k3_omega)
+            omega_update=omega+(1/6)*(k1_omega+2*k2_omega+2*k3_omega+k4_omega)
+            theta_update=theta+(1/6)*(k1_theta+2*k2_theta+2*k3_theta+k4_theta)
+            self.rk_omega_values.append(omega_update)
+            self.rk_theta_values.append(theta_update)
+            self.rk_t_values.append(t)
+            self.rk_drive_values.append(math.cos(omega_D * t))
+            t=t+delta_t
+            #if abs(omega_update-omega)<=1e-5 and abs(theta_update-theta)<=1e-5:
+                #break
+            omega=omega_update
+            theta=theta_update
+        if self.DEBUG==True:
+            print(f"driven omega: {self.rk_omega_values[1:30]}]\n\n")
+            print(f"driven angle: {self.rk_theta_values[1:30]}\n\n")
+            print(f"driven time values: {self.rk_t_values[1:30]}\n\n")
+
+    def nonlinear_simulation(self,omega_D=1,t_array=np.arange(1,10,0.1),delta_t=1):
+        self.nl_omega=[]
+        self.nl_theta=[]
+        self.nl_t=[]
+        self.nl_drive=[]  
+
+        delta_t=self.delta_t
+        alpha=0.2 #rad/s^2
+        t_max=100
+        t_array=np.arange(self.t_0,t_max,delta_t)
+        theta=self.theta_0
+        omega=self.omega_i
+        t=self.t_0
+        for i in range(1, len(t_array)):
+            k1_omega=delta_t*((-self.g/self.l)*math.sin(theta)-2*self.gamma*omega+alpha*math.sin(omega_D*t))
+            k1_theta=delta_t*omega
+            k2_omega=delta_t*((-self.g/self.l)*(math.sin(theta+(k1_theta/2)))-2*self.gamma*(omega+(k1_omega/2))+alpha*math.sin(omega_D*(t+(delta_t/2)))) 
+            k2_theta=delta_t*(omega+(k1_omega/2))
+            k3_omega=delta_t*((-self.g/self.l)*(math.sin(theta+(k2_theta/2)))-2*self.gamma*(omega+(k2_omega/2))+alpha*math.sin(omega_D*(t+(delta_t/2))))
+            k3_theta=delta_t*(omega+(k2_omega/2))
+            k4_omega=delta_t*((-self.g/self.l)*(math.sin(theta+k3_theta))-2*self.gamma*(omega+k3_omega)+alpha*math.sin(omega_D*(t+delta_t))) 
+            k4_theta=delta_t*(omega+k3_omega)
+            omega_update=omega+(1/6)*(k1_omega+2*k2_omega+2*k3_omega+k4_omega)
+            theta_update=theta+(1/6)*(k1_theta+2*k2_theta+2*k3_theta+k4_theta)
+            self.nl_omega.append(omega_update)
+            self.nl_theta.append(theta_update)
+            self.nl_t.append(t)
+            self.nl_drive.append(math.cos(omega_D*t))
+            t=t+delta_t
+            omega=omega_update
+            theta=theta_update
+    
     def partone(self):
-        def pendulum_simulation(omega_D,t_array,delta_t):
-            t=self.t_0 
-            omega=self.omega_i
-            theta=self.theta_0
-            q=self.q
-            if self.DEBUG==True:
-                print(f"q: {q}\n\n")
-                print(f"theta: {theta}\n\n") 
-
-            #Condition for Damped 
-            if q<(2*math.sqrt(self.g/self.l)): #Determing type of dampining based on damp factor 
-                self.type_damp=r"Underdamped ($\gamma < \omega_0$)"
-            elif q==(2*math.sqrt(self.g/self.l)):
-                self.type_damp=r"Critically Damped ($\gamma = \omega_0$)"
-            elif q>(2*math.sqrt(self.g/self.l)):
-                self.type_damp=r"Overdamped ($\gamma > \omega_0$)"
-            if self.DEBUG==True:
-                print(f"type_damp: {self.type_damp}\n\n")
-            
-            #Numerical caluclations - Undamped - Euler-cromer method 
-            for i in range(1, len(t_array)): #providing a signficant amount of steps 
-                self.omega_values.append(omega)
-                self.theta_values.append(theta)
-                self.t_values.append(t)
-                omega=omega-(self.g/self.l)*theta*delta_t 
-                theta=theta+omega*delta_t
-                t=t+delta_t
-                #if abs(omega)<=1e-8 and abs(theta)<=1e-8: #exit loop when close to 0 
-                    #break
-            if self.DEBUG==True:
-                print(f"undamped omega: {self.omega_values[1:30]}\n\n")
-                print(f"undamped angle: {self.theta_values[1:30]}\n\n")
-                print(f"undamped time values: {self.t_values[1:30]}\n\n")
-
-            #Resetting needed variables 
-            t=self.t_0
-            omega=self.omega_i 
-            theta=self.theta_0 
-
-            #Numerical calculation - Damped - Euler-cromer method 
-            for i in range(1, len(t_array)): #Over a signficant amount of steps 
-                self.d_omega_values.append(omega)
-                self.d_theta_values.append(theta)
-                self.d_t_values.append(t)
-                omega=omega-((self.g/self.l)*theta*delta_t+q*omega*delta_t)
-                theta=theta+omega*delta_t
-                t=t+delta_t
-                #if abs(omega)<=1e-8 and abs(theta)<=1e-8:
-                    #break
-            if self.DEBUG==True:
-                print(f"damped omega: {self.d_omega_values[1:30]}\n\n")
-                print(f"damped angle: {self.d_theta_values[1:30]}\n\n")
-                print(f"damped time values: {self.d_t_values[1:30]}\n\n")
-            
-            #Resetting needed variables 
-            t=self.t_0
-            omega=self.omega_i
-            theta=self.theta_0 
-            alpha=0.2 #rad/s^2
-
-            #Numerical calculation - Driven - Runge-Kutta 4th Order
-            #for i in range(10000): 
-            for i in range(1, len(t_array)):
-                k1_omega=delta_t*((-self.g/self.l)*theta-2*self.gamma*omega+alpha*math.sin(omega_D*t))
-                k1_theta=delta_t*omega
-                k2_omega=delta_t*((-self.g/self.l)*(theta+(k1_theta/2))-2*self.gamma*(omega+(k1_omega/2))+alpha*math.sin(omega_D*(t+(delta_t/2)))) 
-                k2_theta=delta_t*(omega+(k1_omega/2))
-                k3_omega=delta_t*((-self.g/self.l)*(theta+(k2_theta/2))-2*self.gamma*(omega+(k2_omega/2))+alpha*math.sin(omega_D*(t+(delta_t/2))))
-                k3_theta=delta_t*(omega+(k2_omega/2))
-                k4_omega=delta_t*((-self.g/self.l)*(theta+k3_theta)-2*self.gamma*(omega+k3_omega)+alpha*math.sin(omega_D*(t+delta_t))) 
-                k4_theta=delta_t*(omega+k3_omega)
-                omega_update=omega+(1/6)*(k1_omega+2*k2_omega+2*k3_omega+k4_omega)
-                theta_update=theta+(1/6)*(k1_theta+2*k2_theta+2*k3_theta+k4_theta)
-                self.rk_omega_values.append(omega_update)
-                self.rk_theta_values.append(theta_update)
-                self.rk_t_values.append(t)
-                self.rk_drive_values.append(math.cos(omega_D * t))
-                t=t+delta_t
-                #if abs(omega_update-omega)<=1e-5 and abs(theta_update-theta)<=1e-5:
-                    #break
-                omega=omega_update
-                theta=theta_update
-            if self.DEBUG==True:
-                print(f"driven omega: {self.rk_omega_values[1:30]}]\n\n")
-                print(f"driven angle: {self.rk_theta_values[1:30]}\n\n")
-                print(f"driven time values: {self.rk_t_values[1:30]}\n\n")
-            #return t_values,theta_values, d_t_values, d_theta_values, type_damp, rk_t_values,rk_theta_values,omega_values,d_omega_values,rk_omega_values,rk_drive_values
-
         #Calculating pendulum simulation using single omega_D value
         omega_D_fix=0.935
         t_max=100
         t_array=np.arange(self.t_0,t_max,self.delta_t)
-        pendulum_simulation(omega_D_fix,t_array,self.delta_t)
-        #self.t_values,self.theta_values, self.d_t_values, self.d_theta_values, self.type_damp, self.rk_t_values,self.rk_theta_values,self.omega_values,self.d_omega_values,self.rk_omega_values,self.rk_drive_values=
-
+        self.linear_simulation(omega_D_fix,t_array,self.delta_t)
+        
         #Plots - Pendulum Simulation 
-        fig,(ax1,ax2)=plt.subplots(2,1, figsize=(12,6))
+        fig,(ax1,ax2)=plt.subplots(2,1, figsize=(10,6))
         ax1.plot(self.t_values,self.theta_values,color='blue',label='Undamped')
         ax1.plot(self.d_t_values, self.d_theta_values,color='green',label=self.type_damp)
         ax1.plot(self.rk_t_values,self.rk_theta_values,color='red',label='Driven')
         ax1.set_ylabel("Angular Discplacment (rad)")
-        ax1.legend(loc="upper left", bbox_to_anchor=(1, 1))
+        ax1.legend(loc="upper right")
         ax2.plot(self.t_values,self.omega_values,color='blue',label='Undamped')
         ax2.plot(self.d_t_values,self.d_omega_values,color='green',label=self.type_damp)
         ax2.plot(self.rk_t_values,self.rk_omega_values,color='red',label='Driven')
         ax2.set_ylabel(r"Angular Velocity ($\frac{\text{rad}}{\text{s}}$)")
-        ax2.legend(loc="upper left", bbox_to_anchor=(1, 1))
+        ax2.legend(loc="upper right")
         fig.supxlabel("Time (s)")
         fig.suptitle(r"Oscillitory Motion - $\Omega_D$=0.935 $\frac{rad}{sec}$")
         for ax in [ax1,ax2]:
             ax.axhline(y=0,color='black',linewidth=1,zorder=1,alpha=0.3,linestyle='--') 
-            ax.set_xlim([0, max(self.d_t_values)])
         plt.tight_layout()
         plt.subplots_adjust(right=0.8)
         plt.show()
@@ -159,7 +203,7 @@ class oscillatory:
             self.rk_drive_values=[]
             t_max=100
             t_array=np.arange(self.t_0,t_max,self.delta_t)
-            pendulum_simulation(omega_D,t_array,self.delta_t)
+            self.linear_simulation(omega_D,t_array,self.delta_t)
             #self.t_values,self.theta_values, self.d_t_values, self.d_theta_values, self.type_damp, self.rk_t_values,self.rk_theta_values,self.omega_values,self.d_omega_values,self.rk_omega_values,self.rk_drive_values=
             #Extracting around steady-state 
             ss_theta=self.rk_theta_values[-len(self.rk_theta_values)//4:] #Last 1/4 of values (around steady portion)
@@ -180,7 +224,7 @@ class oscillatory:
             print(f"theta_0 values: {theta_values}\n\n")
 
         #Plots - Different driving frequencies resonance structure mapping analysis  
-        fig,(ax3,ax4)=plt.subplots(2,1, figsize=(12,6))
+        fig,(ax3,ax4)=plt.subplots(2,1, figsize=(10,6))
         ax3.plot(omega_D_range, theta_values)
         ax3.set_xlabel(r'Driving Frequency $\Omega_\text{D} (\frac{\text{rad}}{\text{sec}})$')
         ax3.set_ylabel(r'Amplitude $\theta_0(\Omega_\text{D})$(rad)')
@@ -209,7 +253,7 @@ class oscillatory:
             plt.hlines(*result[1:],color='C2')
             plt.show()
         
-        #Simulating near resoannce and calculating energies
+    def parttwo(self): #Simulating near resoannce and calculating energies
         ke_values=[]
         pe_values=[]
         te_values=[]
@@ -220,7 +264,7 @@ class oscillatory:
         self.rk_theta_values=[]#Ressting lists before each run and from before 
         self.rk_t_values=[]
         self.rk_drive_values=[]
-        pendulum_simulation(0.935,t_array,self.delta_t)
+        self.linear_simulation(0.935,t_array,self.delta_t) #At a driving frequency close to resonance 
         m=0.5 #kg 
         for omega in self.rk_omega_values:
         #KE calculation
@@ -253,7 +297,49 @@ class oscillatory:
         plt.legend()
         plt.show()
 
+    def partthree(self): #Non-linear effects
+        omega_D=0.935 #Omega_D clost to resonance
+        t_max=100
+        t_array=np.arange(self.t_0,t_max,self.delta_t)
+        self.nonlinear_simulation(omega_D,t_array,self.delta_t)
+        self.linear_simulation(omega_D,t_array,self.delta_t)
+
+        fig,(ax1,ax2)=plt.subplots(2,1, figsize=(10,6))
+        ax1.plot(self.nl_t,self.nl_theta,label='Non-Linear')
+        ax1.plot(self.rk_t_values,self.rk_theta_values,color='red',label='Linear')
+        ax1.set_ylabel("Angular Discplacment (rad)")
+        ax1.legend(loc="best")
+        ax2.plot(self.nl_t,self.nl_omega,label='Non-Linear')
+        ax2.plot(self.rk_t_values,self.rk_omega_values,color='red',label='Linear')
+        ax2.set_ylabel(r"Angular Velocity ($\frac{\text{rad}}{\text{s}}$)")
+        ax2.legend(loc="best")
+        fig.supxlabel('Time (s)')
+        fig.suptitle(r"Oscillitory Motion - $\Omega_D$=0.935 $\frac{rad}{sec}$")
+        plt.show()
+
+        omega_D=1.2 #Omega_D higher than resonance 
+        self.nonlinear_simulation(omega_D,t_array,self.delta_t)
+        self.linear_simulation(omega_D,t_array,self.delta_t)
+        
+        fig,(ax1,ax2)=plt.subplots(2,1, figsize=(10,6))
+        ax1.plot(self.nl_t,self.nl_theta,label='Non-Linear')
+        ax1.plot(self.rk_t_values,self.rk_theta_values,color='red',label='Linear')
+        ax1.set_ylabel("Angular Discplacment (rad)")
+        ax1.legend(loc="best")
+        ax2.plot(self.nl_t,self.nl_omega,label='Non-Linear')
+        ax2.plot(self.rk_t_values,self.rk_omega_values,color='red',label='Linear')
+        ax2.set_ylabel(r"Angular Velocity ($\frac{\text{rad}}{\text{s}}$)")
+        ax2.legend(loc="best")
+        fig.supxlabel('Time (s)')
+        fig.suptitle(r"Oscillitory Motion - $\Omega_D$=1.2 $\frac{rad}{sec}$")
+        plt.show()
+
+
 if __name__=="__main__":
     data=oscillatory()
+    data.nonlinear_simulation()
+    data.linear_simulation()
     data.partone()
+    data.parttwo()
+    data.partthree()
     
