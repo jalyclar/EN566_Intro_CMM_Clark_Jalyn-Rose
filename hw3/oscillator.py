@@ -3,6 +3,11 @@ import matplotlib.pyplot as plt
 import math
 from scipy.signal import find_peaks 
 from scipy.signal import peak_widths
+from scipy.stats import linregress
+
+################      Adjust self. varibales assinged in init    ##############################
+################       Add more DEBUG statments   ##############################
+################       Adjust text and spacial formatting on plots     ##############################
 
 class oscillatory:
     def __init__(self):
@@ -181,7 +186,7 @@ class oscillatory:
         ax2.set_ylabel(r"Angular Velocity ($\frac{\text{rad}}{\text{s}}$)")
         ax2.legend(loc="upper right")
         fig.supxlabel("Time (s)")
-        fig.suptitle(r"Oscillitory Motion - $\Omega_D$=0.935 $\frac{rad}{sec}$")
+        fig.suptitle(r"Oscillitory Motion (Linear) Pendulum When $\Omega_D$=0.935 $\frac{rad}{sec}$")
         for ax in [ax1,ax2]:
             ax.axhline(y=0,color='black',linewidth=1,zorder=1,alpha=0.3,linestyle='--') 
         plt.tight_layout()
@@ -232,7 +237,7 @@ class oscillatory:
         ax4.set_xlabel(r'Driving Frequency $\Omega_\text{D} (\frac{\text{rad}}{\text{sec}})$')
         ax4.set_ylabel(r'Phase Shift $\phi(\Omega_\text{D})$(rad)')
         ax.set_ylim([0, max(theta_values)])
-        fig.suptitle('Resonance Structure Mapping')
+        fig.suptitle('Resonance Structure Mapping (Linear Pnedulum)')
         plt.tight_layout()
         plt.show()
 
@@ -314,7 +319,7 @@ class oscillatory:
         ax2.set_ylabel(r"Angular Velocity ($\frac{\text{rad}}{\text{s}}$)")
         ax2.legend(loc="best")
         fig.supxlabel('Time (s)')
-        fig.suptitle(r"Oscillitory Motion - $\Omega_D$=0.935 $\frac{rad}{sec}$")
+        fig.suptitle(r"Oscillitory Motion of Pendulum When $\Omega_D$=0.935 $\frac{rad}{sec}$")
         plt.show()
 
         omega_D=1.2 #Omega_D higher than resonance 
@@ -331,9 +336,79 @@ class oscillatory:
         ax2.set_ylabel(r"Angular Velocity ($\frac{\text{rad}}{\text{s}}$)")
         ax2.legend(loc="best")
         fig.supxlabel('Time (s)')
-        fig.suptitle(r"Oscillitory Motion - $\Omega_D$=1.2 $\frac{rad}{sec}$")
+        fig.suptitle(r"Oscillitory Motion Pendulum When $\Omega_D$=1.2 $\frac{rad}{sec}$")
         plt.show()
 
+    def partfour(self):
+        delta_t=self.delta_t
+        alpha=[0.2,0.5,1.2]
+        omega_D=0.666
+        t_max=100
+        t_array=np.arange(self.t_0,t_max,delta_t)
+        theta=[15.000,15.001]
+        stability={}
+        for traj in alpha:
+            delta_theta_values=[[],[]]
+            time_values=[[],[]]
+            for idx, angle in enumerate(theta):
+                omega=self.omega_i
+                t=self.t_0
+                for i in range(1, len(t_array)):
+                    k1_omega=delta_t*((-self.g/self.l)*math.sin(angle)-2*self.gamma*omega+traj*math.sin(omega_D*t))
+                    k1_theta=delta_t*omega
+                    k2_omega=delta_t*((-self.g/self.l)*(math.sin(angle+(k1_theta/2)))-2*self.gamma*(omega+(k1_omega/2))+traj*math.sin(omega_D*(t+(delta_t/2)))) 
+                    k2_theta=delta_t*(omega+(k1_omega/2))
+                    k3_omega=delta_t*((-self.g/self.l)*(math.sin(angle+(k2_theta/2)))-2*self.gamma*(omega+(k2_omega/2))+traj*math.sin(omega_D*(t+(delta_t/2))))
+                    k3_theta=delta_t*(omega+(k2_omega/2))
+                    k4_omega=delta_t*((-self.g/self.l)*(math.sin(angle+k3_theta))-2*self.gamma*(omega+k3_omega)+traj*math.sin(omega_D*(t+delta_t))) 
+                    k4_theta=delta_t*(omega+k3_omega)
+                    omega_update=omega+(1/6)*(k1_omega+2*k2_omega+2*k3_omega+k4_omega)
+                    theta_update=angle+(1/6)*(k1_theta+2*k2_theta+2*k3_theta+k4_theta)
+                    theta_update=(theta_update+np.pi)%(2*np.pi)-np.pi
+                    time_values[idx].append(t)
+                    delta_theta_values[idx].append(theta_update)
+                    t=t+delta_t
+                    omega=omega_update
+                    angle=theta_update
+            differences_theta=[]
+            for i in range(len(delta_theta_values[0])):
+                difference_theta=np.abs(delta_theta_values[0][i]-delta_theta_values[1][i])
+                differences_theta.append(difference_theta)
+            stability[traj]=[time_values[0],differences_theta]
+        if self.DEBUG==True:
+            print(f"stability dict: {stability}\n\n")
+        plt.figure()
+        for traj,values in stability.items():
+            time_values,differences_theta=values
+            plt.plot(time_values,np.log(differences_theta),label=f'{traj}')
+        plt.xlabel('Time (s)')
+        plt.ylabel(r'log ($ \Delta \theta $)')
+        plt.title('Pendulum Stability for Lyapunov Estimation')
+        plt.legend()
+        plt.show()
+
+        start_i=1000
+        end_i=8000
+        lyap_values={}
+        plt.figure()
+        for traj,values in stability.items():
+            time_values,differences_theta=values
+            log_differences_theta=np.log(np.array(differences_theta)+1e-10)
+            lin_reg_x=np.array(time_values[start_i:end_i])
+            lin_reg_y=log_differences_theta[start_i:end_i]
+            if self.DEBUG==True:
+                print(f"lin reg x values: {lin_reg_x}\n\n")
+                print(f"lin reg y values: {lin_reg_y}\n\n")
+            slope,intercept,r,p,e=linregress(lin_reg_x,lin_reg_y)
+            lyap_values[traj]=slope
+            plt.plot(time_values,np.log(differences_theta),label=f'{traj}')
+            plt.plot(lin_reg_x,slope*lin_reg_x+intercept,'r--',label=fr'Fit for {traj}: $\lambda$={slope:.2f}')
+        plt.xlabel('Time (s)')
+        plt.ylabel(r'log ($ \Delta \theta $)')
+        plt.title('Lyapunov Exponent Estimation')
+        plt.legend()
+        plt.show()
+        print(lyap_values)
 
 if __name__=="__main__":
     data=oscillatory()
@@ -342,4 +417,5 @@ if __name__=="__main__":
     data.partone()
     data.parttwo()
     data.partthree()
+    data.partfour()
     
