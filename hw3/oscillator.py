@@ -5,6 +5,8 @@ from scipy.signal import find_peaks
 from scipy.signal import peak_widths
 from scipy.stats import linregress
 
+################       Add error analysis on calculated gamma, compare to error given in notes     ##############################
+################      Add optional arguments sys.argv for the different parts of problem    ##############################
 ################      Adjust self. varibales assinged in init    ##############################
 ################       Add more DEBUG statments   ##############################
 ################       Adjust text and spacial formatting on plots     ##############################
@@ -197,7 +199,7 @@ class oscillatory:
         theta_values=[]
         phi_values=[]
         omega_natu=math.sqrt(self.g/self.l)
-        omega_D_range=np.arange(omega_natu*0.1,omega_natu*3,0.1)
+        omega_D_range=np.arange(omega_natu*0.3,omega_natu*2.5,0.01)
         if self.DEBUG==True:
             print(omega_D_range)
 
@@ -249,10 +251,16 @@ class oscillatory:
         result=peak_widths(res_values,res_peaks,rel_height=0.5) #Calculates FWHM
         fwhm=result[0]*omeg_D_values[1]-omeg_D_values[0] #Assings just the width 
         print(f"fwhm of resoannce: {fwhm}")
+        plt.figure()
+        plt.plot(res_values)
+        plt.plot(res_peaks,res_values[res_peaks],'x')
+        plt.hlines(*result[1:],color='C2')
+        plt.show()
         ################       Add error analysis between fwhm and gamma    ##############################
         if self.DEBUG==True:
             print(f"resoannce values type: {type(res_values)}\n\n")
             print(f"peak of resonance: {final_peak}\n\n")
+            plt.figure()
             plt.plot(res_values)
             plt.plot(res_peaks,res_values[res_peaks],'x')
             plt.hlines(*result[1:],color='C2')
@@ -375,12 +383,11 @@ class oscillatory:
                 difference_theta=np.abs(delta_theta_values[0][i]-delta_theta_values[1][i])
                 differences_theta.append(difference_theta)
             stability[traj]=[time_values[0],differences_theta]
-        if self.DEBUG==True:
-            print(f"stability dict: {stability}\n\n")
         plt.figure()
         for traj,values in stability.items():
             time_values,differences_theta=values
-            plt.plot(time_values,np.log(differences_theta),label=f'{traj}')
+            y=np.log(np.array(differences_theta)+1e-10)
+            plt.plot(time_values,y,label=f'{traj}')
         plt.xlabel('Time (s)')
         plt.ylabel(r'log ($ \Delta \theta $)')
         plt.title('Pendulum Stability for Lyapunov Estimation')
@@ -401,7 +408,7 @@ class oscillatory:
                 print(f"lin reg y values: {lin_reg_y}\n\n")
             slope,intercept,r,p,e=linregress(lin_reg_x,lin_reg_y)
             lyap_values[traj]=slope
-            plt.plot(time_values,np.log(differences_theta),label=f'{traj}')
+            plt.plot(time_values,log_differences_theta,label=f'{traj}')
             plt.plot(lin_reg_x,slope*lin_reg_x+intercept,'r--',label=fr'Fit for {traj}: $\lambda$={slope:.2f}')
         plt.xlabel('Time (s)')
         plt.ylabel(r'log ($ \Delta \theta $)')
