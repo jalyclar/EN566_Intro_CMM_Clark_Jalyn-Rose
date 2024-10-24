@@ -10,6 +10,7 @@ from scipy.stats import linregress
 ################      Adjust self. varibales assinged in init    ##############################
 ################       Add more DEBUG statments   ##############################
 ################       Adjust text and spacial formatting on plots     ##############################
+################    Allow command line input      ##########################
 
 class oscillatory:
     def __init__(self):
