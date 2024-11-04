@@ -4,6 +4,9 @@ import random
 import matplotlib.pyplot as plt 
 import numpy as np
 
+###Add statment at top to run 
+###Add sys arg 
+
 def partone():
     N_values=[1000,1000000]
     bin_values=[10,20,50,100]
@@ -19,7 +22,7 @@ def partone():
             plt.xlabel('Random Number')
             plt.ylabel('Frequency')
             plt.title(f'Random Numbers - Bin Size={bin_size} - Random Numbers={N}')
-    plt.show()
+            plt.show()
 
 def parttwo():
     #Box - Mueller Method
