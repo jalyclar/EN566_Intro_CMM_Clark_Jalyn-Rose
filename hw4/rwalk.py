@@ -40,6 +40,13 @@ for i in range(n):
 
 plt.figure()
 plt.plot(range(n),xn,label=r'$\langle x_n \rangle$')
+plt.xlabel('Timestep (i)')
+plt.ylabel('Displacement')
+plt.title('2D Random Walk')
+plt.legend()
+plt.show()
+
+plt.figure()
 plt.plot(range(n),rwx,label=r'$\langle (x_n^2) \rangle$')
 plt.xlabel('Timestep (i)')
 plt.ylabel('Displacement')
