@@ -2,11 +2,9 @@ import random
 import numpy as np 
 import matplotlib.pyplot as plt
 
-###Double check code follows instructions??
 ###Add class
 ###Add statment at top to run 
 ###Add sys arg 
-
 
 n=100
 m=10**4
