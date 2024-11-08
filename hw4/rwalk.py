@@ -11,7 +11,7 @@ class randomwalk():
         self.part=None
         self.n=100
 
-        m=10**4
+        m=10**4 #walkers 
         rwy=np.zeros(self.n)
         self.rwx=np.zeros(self.n)
         self.xn=np.zeros(self.n)
@@ -20,10 +20,10 @@ class randomwalk():
         for i in range(m):
             x=0
             y=0
-            for j in range(2,self.n):
+            for j in range(2,self.n): #Skipping first few 
                 r1=random.random()
                 r2=random.random()
-                if r1<0.5:
+                if r1<0.5: #Conditions for movement in x and y based on random number 
                     x=x+1
                 else:
                     x=x-1
@@ -31,14 +31,14 @@ class randomwalk():
                     y=y+1
                 else:
                     y=y-1
-                self.xn[j]=self.xn[j]+x
+                self.xn[j]=self.xn[j]+x #Storing walks 
                 self.rwx[j]=self.rwx[j]+x**2
                 rwy[j]=rwy[j]+y**2
-        for i in range(self.n):
+        for i in range(self.n): #Normalizing walks 
             self.xn[j]=self.xn[j]/m
             rwy[i]=rwy[i]/m
             self.rwx[i]=self.rwx[i]/m
-            self.msd[i]=self.rwx[i]+rwy[i]
+            self.msd[i]=self.rwx[i]+rwy[i] #caluclating mean square density 
 
     def parse_arg(self):
         for arg in sys.argv[1:]:
@@ -46,8 +46,8 @@ class randomwalk():
                 self.parts=arg.split('=')[1].split(',')
 
     def partone(self):
-        if '1' in self.parts:
-            plt.figure()
+        if '1' in self.parts:   
+            plt.figure() #plotting average walk distance
             plt.plot(range(self.n),self.xn,label=r'$\langle x_n \rangle$')
             plt.xlabel('Timestep (i)')
             plt.ylabel('Displacement')
@@ -55,7 +55,7 @@ class randomwalk():
             plt.legend()
             plt.show()
 
-            plt.figure()
+            plt.figure() #plotting sqaure averag walk distance 
             plt.plot(range(self.n),self.rwx,label=r'$\langle (x_n^2) \rangle$',color='red')
             plt.xlabel('Timestep (i)')
             plt.ylabel('Displacement')
@@ -65,10 +65,10 @@ class randomwalk():
     
     def parttwo(self):
         if '2' in self.parts:
-            slope,intercept=np.polyfit(range(self.n),self.msd,1)
+            slope,intercept=np.polyfit(range(self.n),self.msd,1) #fitting linear polynomial to msd to calulate D
             D=slope/2
 
-            plt.figure()
+            plt.figure()  #plotting mean square density 
             plt.plot(range(self.n),self.msd,label=r'$\langle r^2 \rangle$',color='black')
             plt.plot(range(self.n),slope*np.array(range(self.n))+intercept,'--', color='pink',label=f'Diffusion Fit - D={slope}')
             plt.plot()

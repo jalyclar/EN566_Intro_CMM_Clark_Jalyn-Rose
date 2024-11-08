@@ -18,7 +18,7 @@ center1=nx//2-2
 center2=nx//2+3
 rho[center1:center2]=1 #inital peak around x=0
 
-snaps=[]
+snaps=[] #to store snapshots at specific times 
 t_snaps=[]
 rho_new=rho.copy()
 for n in range(nt): #for snaps 
