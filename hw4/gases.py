@@ -1,10 +1,13 @@
+#!/opt/anaconda3/bin/python 
+
 import numpy as np
 import matplotlib.pyplot as plt 
 import random
+import sys
 
-###Add class
-###Add statment at top to run 
-###Add sys arg 
+for arg in sys.argv[1:]:
+    if "part=" in arg:
+        parts=arg.split('=')[1].split(',')
 
 h=60
 w=40
@@ -34,47 +37,50 @@ for iter in iterations:
         if 0<=ny<h and 0<=nx<w and grid[nx,ny]==0:
             grid[nx,ny]=gas_par
             grid[x,y]=0
-    plt.figure(figsize=(9,6)) #Part one 
-    plt.imshow(grid,cmap='RdBu',origin='upper')
-    plt.colorbar(label='Species')
-    plt.title(f'Diffusion of Gas Particles A and B at iter:{iter}')
-    plt.show()
+    if '1' in parts:
+        plt.figure(figsize=(9,6)) #Part one 
+        plt.imshow(grid,cmap='RdBu',origin='upper')
+        plt.colorbar(label='Species')
+        plt.title(f'Diffusion of Gas Particles A and B at iter:{iter}')
+        plt.show()
 
-    na=np.zeros(h) #Part two
-    nb=np.zeros(h)
-    for x in range(h):
-        col=grid[:,x]
-        A=np.sum(col==-1)
-        B=np.sum(col==1)
-        na[x]=A/w
-        nb[x]=B/w
-    plt.figure(figsize=(9,6))
-    plt.plot(np.arange(h),na,color='red',label=r'$n_A(x)$')
-    plt.plot(np.arange(h),nb,color='blue',label=r'$n_B(x)$')
-    plt.xlabel('(x)')
-    plt.ylabel('Population Density')
-    plt.title(f'Population Densities at iter:{iter}')
-    plt.legend()
-    plt.show()
-
-    for t in range(trials): #Part three
-        na_trial=np.zeros(h)
-        nb_trial=np.zeros(h)
+    if '2' in parts:
+        na=np.zeros(h) #Part two
+        nb=np.zeros(h)
         for x in range(h):
             col=grid[:,x]
             A=np.sum(col==-1)
             B=np.sum(col==1)
-            na_trial[x]=A/w
-            nb_trial[x]=B/w
-        na_tot=na_tot+na_trial
-        nb_tot=nb_tot+nb_trial
-    na_av=na_tot/trials
-    nb_av=nb_tot/trials
-    plt.figure(figsize=(9,6))
-    plt.plot(np.arange(h),na_av,color='red',label=r'Average Density $n_A(x)$')
-    plt.plot(np.arange(h),nb_av,color='blue',label=r'Average Density $n_B(x)$')
-    plt.xlabel('(x)')
-    plt.ylabel('Average Population Density')
-    plt.title(f'Average Population Densities at iter:{iter}')
-    plt.legend()
-    plt.show()
+            na[x]=A/w
+            nb[x]=B/w
+        plt.figure(figsize=(9,6))
+        plt.plot(np.arange(h),na,color='red',label=r'$n_A(x)$')
+        plt.plot(np.arange(h),nb,color='blue',label=r'$n_B(x)$')
+        plt.xlabel('(x)')
+        plt.ylabel('Population Density')
+        plt.title(f'Population Densities at iter:{iter}')
+        plt.legend()
+        plt.show()
+
+    if '3' in parts:
+        for t in range(trials): #Part three
+            na_trial=np.zeros(h)
+            nb_trial=np.zeros(h)
+            for x in range(h):
+                col=grid[:,x]
+                A=np.sum(col==-1)
+                B=np.sum(col==1)
+                na_trial[x]=A/w
+                nb_trial[x]=B/w
+            na_tot=na_tot+na_trial
+            nb_tot=nb_tot+nb_trial
+        na_av=na_tot/trials
+        nb_av=nb_tot/trials
+        plt.figure(figsize=(9,6))
+        plt.plot(np.arange(h),na_av,color='red',label=r'Average Density $n_A(x)$')
+        plt.plot(np.arange(h),nb_av,color='blue',label=r'Average Density $n_B(x)$')
+        plt.xlabel('(x)')
+        plt.ylabel('Average Population Density')
+        plt.title(f'Average Population Densities at iter:{iter}')
+        plt.legend()
+        plt.show()

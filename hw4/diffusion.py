@@ -1,9 +1,8 @@
+#!/opt/anaconda3/bin/python 
+
 import numpy as np
 import matplotlib.pyplot as plt 
 from scipy.optimize import curve_fit
-
-###Add statment at top to run 
-###Add sys arg 
 
 D=2 #diffusion constant 
 L=10 #grid size 
