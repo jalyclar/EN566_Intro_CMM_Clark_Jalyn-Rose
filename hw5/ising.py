@@ -30,7 +30,7 @@ for t in temps:
             deltaE=2*j*spin*nbs
             if deltaE<=0 or random.random()<np.exp(-deltaE/(kb*t)):
                 lats[i,j]*=-1
-
+#magnetism calculations
     m=0
     for it in range(eqt):
         for s in range(N):
@@ -43,16 +43,20 @@ for t in temps:
                 lats[i,j]*=-1
         m+=np.abs(np.sum(lats))
     mag.append(m/(eqt*N))
+    with open('magdata.txt','w') as file:
+        for item in mag:
+            file.write(item+'\n')
 
 plt.figure()
 plt.plot(temps,mag,label='Magnetization')
 plt.axvline(x=2.27, color='red', linestyle='--', label='Critical Temperature')
 plt.xlabel('Temperature (K)')
-plt.ylable('Magnetization')
+plt.ylabel('Magnetization')
 plt.title('Magnetization as a Function fo Temperature - 2D Ising Model')
 plt.legend()
+plt.savefig('part1plot.png')
 plt.show()
-    
+
 
 
 
