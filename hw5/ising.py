@@ -9,15 +9,15 @@ def partone():
     j=1.5 #nn interaction stregnth 
     h=0 #no external magnetic field 
     kb=1.0 #boltzman constant 
-    iterations=2000
-    eqt=2000
+    iterations=5000
+    eqt=5000
 
     #Initialization 
     lats=np.empty((n,n),dtype=int)
     for i in range(n):
         for j in range(n):
             lats[i,j]=1 if random.random() <0.5 else -1
-    temps=np.arange(1,5,0.01)
+    temps=np.arange(1,5,0.001)
     mag=[] #to hold magnetism 
 
     #equlibrium first 
@@ -47,7 +47,6 @@ def partone():
 
     plt.figure()
     plt.plot(temps,mag,label='Magnetization')
-    plt.axvline(x=2.27, color='red', linestyle='--', label='Critical Temperature')
     plt.xlabel('Temperature (K)')
     plt.ylabel('Magnetization')
     plt.title('Magnetization as a Function fo Temperature - 2D Ising Model')
@@ -60,8 +59,8 @@ def parttwo():
     j=1.5 #nn interaction stregnth 
     h=0 #no external magnetic field 
     kb=1.0 #boltzman constant 
-    iterations=2000
-    eqt=2000
+    iterations=5000
+    eqt=5000
     temps=np.arange(1,5,0.01)
 
     #Initilization 
