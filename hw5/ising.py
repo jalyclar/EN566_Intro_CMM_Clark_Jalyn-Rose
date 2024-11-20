@@ -2,35 +2,48 @@ import numpy as np
 import random 
 import matplotlib.pyplot as plt 
 
-def partone():
-    #Variables 
-    n=50
-    N=n*n
-    j=1.5 #nn interaction stregnth 
-    h=0 #no external magnetic field 
-    kb=1.0 #boltzman constant 
-    iterations=5000
-    eqt=5000
-
-    #Initialization 
+def lattice(n):
     lats=np.empty((n,n),dtype=int)
     for i in range(n):
         for j in range(n):
             lats[i,j]=1 if random.random() <0.5 else -1
-    temps=np.arange(1,5,0.001)
+    return lats
+
+def montecarlo(spins,kb,N,J):
+    for space in range(N):
+        i=random.randint(0,spins.shape[0]-1) #getting random sites 
+        j=random.randint(0,spins.shape[0]-1)
+        spin=spins[i,j]
+        nbs=(spins[(i-1)%spins.shape[0],j]+spins[(i+1)%spins.shape[0],j]+spins[i,(j-1)%spins.shape[0]]+spins[i,(j+1)%spins.shape[0]])
+        deltaE=2*J*spin*nbs
+        if deltaE<=0 or random.random()<np.exp(-deltaE/(kb*t)):
+            spins[i,j]*=-1
+
+def energy(spins,J):
+
+
+def partone():
+
+
+def parttwo():
+
+def partone():
+    #Variables 
+    n=10
+    N=n*n
+    J=1.5 #nn interaction stregnth 
+    h=0 #no external magnetic field 
+    kb=1.0 #boltzman constant 
+    iterations=500
+    eqt=500
+
+    #Initialization 
+    temps=np.linspace(1,3.5,30)
     mag=[] #to hold magnetism 
 
     #equlibrium first 
     for t in temps:
         for iter in range(iterations):
-            for space in range(N):
-                i=random.randint(0,n-1) #getting random sites 
-                j=random.randint(0,n-1)
-                spin=lats[i,j]
-                nbs=(lats[(i-1)%n,j]+lats[(i+1)%n,j]+lats[i,(j-1)%n]+lats[i,(j+1)%n])
-                deltaE=2*j*spin*nbs
-                if deltaE<=0 or random.random()<np.exp(-deltaE/(kb*t)):
-                    lats[i,j]*=-1
     #magnetism calculations
         m=0
         for it in range(eqt):
@@ -39,7 +52,7 @@ def partone():
                 j=random.randint(0,n-1)
                 spin=lats[i,j]
                 nbs=(lats[(i-1)%n,j]+lats[(i+1)%n,j]+lats[i,(j-1)%n]+lats[i,(j+1)%n])
-                deltaE=2*j*spin*nbs
+                deltaE=2*J*spin*nbs
                 if deltaE<=0 or random.random()<np.exp(-deltaE/(kb*t)):
                     lats[i,j]*=-1
             m+=np.abs(np.sum(lats))
@@ -56,12 +69,12 @@ def partone():
 def parttwo():
     #Variables 
     lats=[5,10,20,30,40,50,75,100,200,500]
-    j=1.5 #nn interaction stregnth 
+    J=1.5 #nn interaction stregnth 
     h=0 #no external magnetic field 
     kb=1.0 #boltzman constant 
-    iterations=5000
-    eqt=5000
-    temps=np.arange(1,5,0.01)
+    iterations=500
+    eqt=500
+    temps=np.linspace(1,3.5,30)
 
     #Initilization 
     cmax_n=[]
@@ -84,7 +97,7 @@ def parttwo():
                     j=random.randint(0,n-1)
                     spin=lats[i,j]
                     nbs=(lats[(i-1)%n,j]+lats[(i+1)%n,j]+lats[i,(j-1)%n]+lats[i,(j+1)%n])
-                    deltaE=2*j*spin*nbs
+                    deltaE=2*J*spin*nbs
                     if deltaE<=0 or random.random()<np.exp(-deltaE/(kb*t)):
                         lats[i,j]*=-1
             #En
@@ -95,10 +108,10 @@ def parttwo():
                     j=random.randint(0,n-1)
                     spin=lats[i,j]
                     nbs=(lats[(i-1)%n,j]+lats[(i+1)%n,j]+lats[i,(j-1)%n]+lats[i,(j+1)%n])
-                    deltaE=2*j*spin*nbs
+                    deltaE=2*J*spin*nbs
                     if deltaE<=0 or random.random()<np.exp(-deltaE/(kb*t)):
                         lats[i,j]*=-1
-                E=-j*np.sum(lats*(np.roll(lats,1,axis=0)+np.roll(lats,-1,axis=0)+np.roll(lats,1,axis=1)+np.roll(lats,-1,axis=1)))/2
+                E=-J*np.sum(lats*(np.roll(lats,1,axis=0)+np.roll(lats,-1,axis=0)+np.roll(lats,1,axis=1)+np.roll(lats,-1,axis=1)))/2
                 energy.append(E)
 
             av_E=np.mean(energy)
@@ -138,6 +151,8 @@ def parttwo():
 partone()
 parttwo()
 
-
+if __name__=="__main__":
+    partone()
+    parttwo()
 
 
