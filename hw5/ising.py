@@ -1,4 +1,4 @@
-#!/opt/anaconda3/bin/python 
+#!/opt/homebrew/opt/python@3.13/bin/python3
 
 import numpy as np 
 import random 
@@ -81,7 +81,7 @@ class ising_simulation():
 
             for n in lattices:
                 N=n*n
-                spins=lattices(n)
+                spins=self.get_lattice(n)
                 c_n=[] #to store specific heat 
 
                 for t in self.temps:
